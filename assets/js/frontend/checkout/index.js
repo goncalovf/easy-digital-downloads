@@ -169,7 +169,7 @@ window.EDD_Checkout = ( function( $ ) {
 			success: function( discount_response ) {
 				if ( discount_response ) {
 					if ( discount_response.msg == 'valid' ) {
-						$( '.edd_cart_discount' ).html( discount_response.html );
+						$( '.edd_cart_discount' ).html( '<td>' + discount_response.html + '</td>' );
 						$( '.edd_cart_discount_row' ).show();
 
 						$( '.edd_cart_amount' ).each( function() {
