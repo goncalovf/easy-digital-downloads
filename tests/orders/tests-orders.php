@@ -17,10 +17,20 @@ class Orders extends EDD_UnitTestCase {
 	protected static $orders = array();
 
 	/**
+	 * An ID guaranteed not to match any order, customer, or user created in
+	 * this class. Captured once after fixtures are created so it reflects the
+	 * actual sequence boundary for this test run.
+	 *
+	 * @var int
+	 */
+	protected static $non_existent_id;
+
+	/**
 	 * Set up fixtures once.
 	 */
 	public static function wpSetUpBeforeClass() {
-		self::$orders = parent::edd()->order->create_many( 5 );
+		self::$orders          = parent::edd()->order->create_many( 5 );
+		self::$non_existent_id = \WP_UnitTest_Generator_Sequence::$incr + mt_rand( 1, 33 );
 	}
 
 	/**
@@ -192,7 +202,7 @@ class Orders extends EDD_UnitTestCase {
 	public function test_get_orders_with_user_id__not_in_should_return_5() {
 		$orders = edd_get_orders( array(
 			'user_id__not_in' => array(
-				999,
+				self::$non_existent_id,
 			),
 		) );
 
@@ -254,7 +264,7 @@ class Orders extends EDD_UnitTestCase {
 	public function test_get_orders_with_customer_id__not_in_should_return_5() {
 		$orders = edd_get_orders( array(
 			'customer_id__not_in' => array(
-				999,
+				self::$non_existent_id,
 			),
 		) );
 
@@ -304,7 +314,7 @@ class Orders extends EDD_UnitTestCase {
 	public function test_get_orders_with_email__not_in_should_return_5() {
 		$orders = edd_get_orders( array(
 			'email__not_in' => array(
-				'user999@edd.test',
+				self::generate_test_email(),
 			),
 		) );
 
@@ -476,7 +486,7 @@ class Orders extends EDD_UnitTestCase {
 	 */
 	public function test_get_orders_with_invalid_user_id_should_return_0() {
 		$orders = edd_get_orders( array(
-			'user_id' => 999,
+			'user_id' => self::$non_existent_id,
 		) );
 
 		$this->assertCount( 0, $orders );
@@ -487,7 +497,7 @@ class Orders extends EDD_UnitTestCase {
 	 */
 	public function test_get_orders_with_invalid_customer_id_should_return_0() {
 		$orders = edd_get_orders( array(
-			'customer_id' => 999,
+			'customer_id' => self::$non_existent_id,
 		) );
 
 		$this->assertCount( 0, $orders );

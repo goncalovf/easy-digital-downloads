@@ -25,11 +25,25 @@ abstract class EDD_UnitTestCase extends BaseTestCase {
 	public static $original_gmt_offset;
 
 	/**
+	 * Shared EDD factory instance, reset per test class so sequence counters
+	 * always start from 1 for each class.
+	 *
+	 * @var Factory|null
+	 */
+	private static $edd_factory = null;
+
+	/**
 	 * Runs once before any tests run.
 	 *
 	 * @return void
 	 */
 	public static function setUpBeforeClass(): void {
+		// Reset the shared factory so each test class gets fresh sequence
+		// counters starting at 1, preventing accumulated values from
+		// colliding with hardcoded sentinel values in tests.
+		self::$edd_factory                     = null;
+		\WP_UnitTest_Generator_Sequence::$incr = 0;
+
 		parent::setUpBeforeClass();
 
 		edd_install();
@@ -163,12 +177,24 @@ abstract class EDD_UnitTestCase extends BaseTestCase {
 		return $annotations;
 	}
 
-	protected static function edd() {
-		static $factory = null;
-		if ( ! $factory ) {
-			$factory = new Factory();
+	protected static function edd(): Factory {
+		if ( null === self::$edd_factory ) {
+			self::$edd_factory = new Factory();
 		}
-		return $factory;
+		return self::$edd_factory;
+	}
+
+	/**
+	 * Generates a unique email address for use in tests.
+	 *
+	 * Avoids coupling test expectations to the WP_UnitTest_Generator_Sequence
+	 * pattern (user%d@edd.test), which can collide with sequence-generated
+	 * values when tests check for "non-existent" emails.
+	 *
+	 * @return string
+	 */
+	protected static function generate_test_email(): string {
+		return 'test_' . uniqid( '', true ) . '@edd.test';
 	}
 
 	protected static function _delete_all_edd_data() {

@@ -82,12 +82,9 @@ class CartRoutes extends EDD_UnitTestCase {
 	public function test_register_creates_routes() {
 		global $wp_rest_server;
 
-		if ( empty( $wp_rest_server ) ) {
-			$wp_rest_server = new \WP_REST_Server();
-			do_action( 'rest_api_init' );
-		}
+		$wp_rest_server = new \WP_REST_Server();
 
-		// Expect incorrect usage since we're registering routes outside the action for testing
+		// Expect incorrect usage since we're registering routes outside the action for testing.
 		$this->setExpectedIncorrectUsage( 'register_rest_route' );
 
 		$this->routes->register();
@@ -116,12 +113,9 @@ class CartRoutes extends EDD_UnitTestCase {
 	public function test_add_route_configuration() {
 		global $wp_rest_server;
 
-		if ( empty( $wp_rest_server ) ) {
-			$wp_rest_server = new \WP_REST_Server();
-			do_action( 'rest_api_init' );
-		}
+		$wp_rest_server = new \WP_REST_Server();
 
-		// Expect incorrect usage since we're registering routes outside the action for testing
+		// Expect incorrect usage since we're registering routes outside the action for testing.
 		$this->setExpectedIncorrectUsage( 'register_rest_route' );
 
 		$this->routes->register();
@@ -179,12 +173,9 @@ class CartRoutes extends EDD_UnitTestCase {
 	public function test_remove_route_configuration() {
 		global $wp_rest_server;
 
-		if ( empty( $wp_rest_server ) ) {
-			$wp_rest_server = new \WP_REST_Server();
-			do_action( 'rest_api_init' );
-		}
+		$wp_rest_server = new \WP_REST_Server();
 
-		// Expect incorrect usage since we're registering routes outside the action for testing
+		// Expect incorrect usage since we're registering routes outside the action for testing.
 		$this->setExpectedIncorrectUsage( 'register_rest_route' );
 
 		$this->routes->register();
@@ -220,12 +211,9 @@ class CartRoutes extends EDD_UnitTestCase {
 	public function test_update_quantity_route_configuration() {
 		global $wp_rest_server;
 
-		if ( empty( $wp_rest_server ) ) {
-			$wp_rest_server = new \WP_REST_Server();
-			do_action( 'rest_api_init' );
-		}
+		$wp_rest_server = new \WP_REST_Server();
 
-		// Expect incorrect usage since we're registering routes outside the action for testing
+		// Expect incorrect usage since we're registering routes outside the action for testing.
 		$this->setExpectedIncorrectUsage( 'register_rest_route' );
 
 		$this->routes->register();
@@ -266,12 +254,9 @@ class CartRoutes extends EDD_UnitTestCase {
 	public function test_contents_route_configuration() {
 		global $wp_rest_server;
 
-		if ( empty( $wp_rest_server ) ) {
-			$wp_rest_server = new \WP_REST_Server();
-			do_action( 'rest_api_init' );
-		}
+		$wp_rest_server = new \WP_REST_Server();
 
-		// Expect incorrect usage since we're registering routes outside the action for testing
+		// Expect incorrect usage since we're registering routes outside the action for testing.
 		$this->setExpectedIncorrectUsage( 'register_rest_route' );
 
 		$this->routes->register();
@@ -299,12 +284,9 @@ class CartRoutes extends EDD_UnitTestCase {
 	public function test_token_route_configuration() {
 		global $wp_rest_server;
 
-		if ( empty( $wp_rest_server ) ) {
-			$wp_rest_server = new \WP_REST_Server();
-			do_action( 'rest_api_init' );
-		}
+		$wp_rest_server = new \WP_REST_Server();
 
-		// Expect incorrect usage since we're registering routes outside the action for testing
+		// Expect incorrect usage since we're registering routes outside the action for testing.
 		$this->setExpectedIncorrectUsage( 'register_rest_route' );
 
 		$this->routes->register();
@@ -332,12 +314,9 @@ class CartRoutes extends EDD_UnitTestCase {
 	public function test_routes_use_correct_namespace_and_version() {
 		global $wp_rest_server;
 
-		if ( empty( $wp_rest_server ) ) {
-			$wp_rest_server = new \WP_REST_Server();
-			do_action( 'rest_api_init' );
-		}
+		$wp_rest_server = new \WP_REST_Server();
 
-		// Expect incorrect usage since we're registering routes outside the action for testing
+		// Expect incorrect usage since we're registering routes outside the action for testing.
 		$this->setExpectedIncorrectUsage( 'register_rest_route' );
 
 		$this->routes->register();

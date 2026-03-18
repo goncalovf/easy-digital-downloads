@@ -165,4 +165,88 @@ class Validator extends EDD_UnitTestCase {
 		$result = $method->invokeArgs( null, array( $block_post_id ) );
 		$this->assertTrue( $result, 'has_checkout should return true when post has checkout block' );
 	}
+
+	public function test_get_checkout_type_default_is_block() {
+		$this->assertEquals( 'block', \EDD\Checkout\Validator::get_checkout_type() );
+	}
+
+	public function test_get_checkout_type_unknown_when_no_purchase_page() {
+		$original = edd_get_option( 'purchase_page' );
+		edd_delete_option( 'purchase_page' );
+
+		$this->assertEquals( 'unknown', \EDD\Checkout\Validator::get_checkout_type() );
+
+		edd_update_option( 'purchase_page', $original );
+	}
+
+	public function test_get_checkout_type_shortcode() {
+		$page_id = $this->factory->post->create(
+			array(
+				'post_type'    => 'page',
+				'post_content' => '[download_checkout]',
+			)
+		);
+
+		$this->assertEquals( 'shortcode', \EDD\Checkout\Validator::get_checkout_type( $page_id ) );
+
+		wp_delete_post( $page_id );
+	}
+
+	public function test_get_checkout_type_block() {
+		$page_id = $this->factory->post->create(
+			array(
+				'post_type'    => 'page',
+				'post_content' => '<!-- wp:edd/checkout /-->',
+			)
+		);
+
+		$this->assertEquals( 'block', \EDD\Checkout\Validator::get_checkout_type( $page_id ) );
+
+		wp_delete_post( $page_id );
+	}
+
+	public function test_get_checkout_type_undetermined_when_no_recognized_checkout() {
+		$page_id = $this->factory->post->create(
+			array(
+				'post_type'    => 'page',
+				'post_content' => '<p>Just some content, no checkout.</p>',
+			)
+		);
+
+		$this->assertEquals( 'undetermined', \EDD\Checkout\Validator::get_checkout_type( $page_id ) );
+
+		wp_delete_post( $page_id );
+	}
+
+	public function test_get_checkout_type_elementor() {
+		require_once EDD_PLUGIN_DIR . 'tests/helpers/stubs/elementor.php';
+
+		$page_id = $this->factory->post->create(
+			array(
+				'post_type'    => 'page',
+				'post_content' => '',
+			)
+		);
+
+		// Set up Elementor stub with an edd-checkout widget on the page.
+		\Elementor\Plugin::init();
+		\Elementor\Plugin::$instance->documents->register(
+			$page_id,
+			new \Elementor\Document(
+				true,
+				array(
+					array(
+						'elType'     => 'widget',
+						'widgetType' => 'edd-checkout',
+						'settings'   => array(),
+					),
+				)
+			)
+		);
+
+		$this->assertEquals( 'elementor', \EDD\Checkout\Validator::get_checkout_type( $page_id ) );
+
+		\Elementor\Plugin::reset();
+		wp_delete_post( $page_id );
+	}
 }

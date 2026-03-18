@@ -81,6 +81,75 @@ class ProductDropdown extends EDD_UnitTestCase {
 		$this->assertStringNotContainsString( 'value="' . $bundled_download->ID . '"', $product_dropdown );
 	}
 
+	public function test_product_dropdown_no_bundles_has_search_data_attribute() {
+		$product_dropdown = EDD()->html->product_dropdown(
+			array(
+				'bundles' => false,
+			)
+		);
+
+		$this->assertStringContainsString( 'data-search-no-bundles="1"', $product_dropdown );
+	}
+
+	public function test_product_dropdown_bundles_included_no_search_data_attribute() {
+		$product_dropdown = EDD()->html->product_dropdown();
+
+		$this->assertStringNotContainsString( 'data-search-no-bundles', $product_dropdown );
+	}
+
+	public function test_product_dropdown_variations_has_search_data_attribute() {
+		$product_dropdown = EDD()->html->product_dropdown(
+			array(
+				'variations' => true,
+			)
+		);
+
+		$this->assertStringContainsString( 'data-search-variations="1"', $product_dropdown );
+	}
+
+	public function test_product_dropdown_variations_only_has_search_data_attribute() {
+		$product_dropdown = EDD()->html->product_dropdown(
+			array(
+				'variations'           => true,
+				'show_variations_only' => true,
+			)
+		);
+
+		$this->assertStringContainsString( 'data-search-variations="1"', $product_dropdown );
+		$this->assertStringContainsString( 'data-search-variations-only="1"', $product_dropdown );
+	}
+
+	public function test_product_dropdown_exclude_current_has_search_data_attribute() {
+		$download = EDD_Helper_Download::create_simple_download();
+
+		// Simulate being on a post edit screen.
+		$GLOBALS['post'] = get_post( $download->ID );
+
+		$product_dropdown = EDD()->html->product_dropdown(
+			array(
+				'exclude_current' => true,
+			)
+		);
+
+		$this->assertStringContainsString( 'data-search-current-id="' . $download->ID . '"', $product_dropdown );
+
+		unset( $GLOBALS['post'] );
+	}
+
+	public function test_product_dropdown_excluded_products_has_search_exclusions() {
+		$download1 = EDD_Helper_Download::create_simple_download();
+		$download2 = EDD_Helper_Download::create_simple_download();
+
+		$product_dropdown = EDD()->html->product_dropdown(
+			array(
+				'excluded_products' => array( $download1->ID, $download2->ID ),
+			)
+		);
+
+		$this->assertStringContainsString( 'data-search-exclusions="' . $download1->ID . ',' . $download2->ID . '"', $product_dropdown );
+		$this->assertStringNotContainsString( 'data-excluded-products', $product_dropdown );
+	}
+
 	public function test_product_dropdown_selected_is_included() {
 		$download         = EDD_Helper_Download::create_simple_download();
 		$product_dropdown = EDD()->html->product_dropdown(

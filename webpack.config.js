@@ -200,9 +200,10 @@ const config = {
 	externals: {
 		jquery: 'jQuery',
 		$: 'jQuery',
-		// Note: @wordpress/interactivity is NOT externalized because it uses
-		// WordPress script modules, which handle import mapping automatically.
-		// The import will be resolved by WordPress Core at runtime.
+		'@wordpress/element': 'wp.element',
+		'react': 'React',
+		'react-dom': 'ReactDOM',
+		'tom-select': 'TomSelect',
 	},
 	plugins: [
 		new MiniCSSExtractPlugin( {

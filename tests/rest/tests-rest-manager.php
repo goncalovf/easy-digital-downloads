@@ -86,12 +86,58 @@ class Manager extends EDD_UnitTestCase {
 
 		$routes = $wp_rest_server->get_routes();
 
-		// Verify cart routes are registered
+		// Verify cart routes are registered.
 		$this->assertArrayHasKey( '/edd/v3/cart/add', $routes );
 		$this->assertArrayHasKey( '/edd/v3/cart/remove', $routes );
 		$this->assertArrayHasKey( '/edd/v3/cart/update-quantity', $routes );
 		$this->assertArrayHasKey( '/edd/v3/cart/contents', $routes );
 		$this->assertArrayHasKey( '/edd/v3/cart/token', $routes );
+
+		// Verify notification routes are registered.
+		$this->assertArrayHasKey( '/edd/v3/notifications', $routes );
+		$this->assertArrayHasKey( '/edd/v3/notifications/(?P<id>\\d+)', $routes );
+	}
+
+	/**
+	 * Test that notification routes have correct HTTP methods.
+	 *
+	 * @covers \EDD\REST\Manager::register_rest_routes
+	 */
+	public function test_notification_routes_have_correct_methods() {
+		global $wp_rest_server;
+
+		$routes = $wp_rest_server->get_routes();
+
+		// Test list notifications route uses GET.
+		$this->assertArrayHasKey( '/edd/v3/notifications', $routes );
+		$list_route = $routes['/edd/v3/notifications'][0];
+		$this->assertArrayHasKey( \WP_REST_Server::READABLE, $list_route['methods'] );
+
+		// Test dismiss notification route uses DELETE.
+		$this->assertArrayHasKey( '/edd/v3/notifications/(?P<id>\\d+)', $routes );
+		$dismiss_route = $routes['/edd/v3/notifications/(?P<id>\\d+)'][0];
+		$this->assertArrayHasKey( \WP_REST_Server::DELETABLE, $dismiss_route['methods'] );
+	}
+
+	/**
+	 * Test that notification routes have permission callbacks.
+	 *
+	 * @covers \EDD\REST\Manager::register_rest_routes
+	 */
+	public function test_notification_routes_have_permission_callbacks() {
+		global $wp_rest_server;
+
+		$routes = $wp_rest_server->get_routes();
+
+		// Test list notifications route has permission callback.
+		$list_route = $routes['/edd/v3/notifications'][0];
+		$this->assertArrayHasKey( 'permission_callback', $list_route );
+		$this->assertIsCallable( $list_route['permission_callback'] );
+
+		// Test dismiss notification route has permission callback.
+		$dismiss_route = $routes['/edd/v3/notifications/(?P<id>\\d+)'][0];
+		$this->assertArrayHasKey( 'permission_callback', $dismiss_route );
+		$this->assertIsCallable( $dismiss_route['permission_callback'] );
 	}
 
 	/**
