@@ -9,11 +9,11 @@
 namespace EDD\Tests\Notifications;
 
 use EDD\Tests\PHPUnit\EDD_UnitTestCase;
-use EDD\API\v3\Endpoint;
+use EDD\REST\Routes\Route;
 use EDD\Models\Notification;
 
 /**
- * @coversDefaultClass \EDD\API\v3\Notifications
+ * @coversDefaultClass \EDD\REST\Controllers\Notifications
  */
 class NotificationApiTests extends EDD_UnitTestCase {
 
@@ -54,12 +54,15 @@ class NotificationApiTests extends EDD_UnitTestCase {
 			$thing->truncate();
 		}
 
+		self::$notificationIds = array();
+
 		// Insert 5 notifications.
 		for ( $i = 1; $i <= 5; $i ++ ) {
 			self::$notificationIds[] = (int) EDD()->notifications->insert( array(
 				'title'     => 'Notification ' . $i,
 				'content'   => 'Notification ' . $i,
 				'type'      => 'success',
+				'source'    => 'api',
 				'dismissed' => 0,
 			) );
 		}
@@ -68,7 +71,7 @@ class NotificationApiTests extends EDD_UnitTestCase {
 		 * Also need to make sure we have the EDD roles so that we pass the
 		 * capability check.
 		 *
-		 * @see \EDD\API\v3\Notifications::canViewNotification
+		 * @see \EDD\REST\Routes\Notifications::check_permission
 		 */
 		$roles = new \EDD_Roles;
 		$roles->add_roles();
@@ -92,8 +95,9 @@ class NotificationApiTests extends EDD_UnitTestCase {
 	 */
 	protected function makeRestRequest( $endpointUri = 'notifications', $payload = array(), $method = \WP_REST_Server::READABLE ) {
 		$request = new \WP_REST_Request( $method, sprintf(
-			'/%s/%s',
-			Endpoint::$namespace,
+			'/%s/%s/%s',
+			Route::NAMESPACE,
+			Route::$version,
 			$endpointUri
 		) );
 
@@ -107,7 +111,7 @@ class NotificationApiTests extends EDD_UnitTestCase {
 	}
 
 	/**
-	 * @covers \EDD\API\v3\Notifications::listNotifications
+	 * @covers \EDD\REST\Controllers\Notifications::list_notifications
 	 * @return void
 	 */
 	public function test_get_notifications_returns_5_notifications() {
@@ -115,16 +119,19 @@ class NotificationApiTests extends EDD_UnitTestCase {
 		$response_data = $response->get_data();
 
 		$this->assertEquals( 200, $response->get_status() );
-		$this->assertCount( 5, $response_data['active'] );
+		$this->assertArrayHasKey( 'notifications', $response_data );
+		$this->assertArrayHasKey( 'total', $response_data );
+		$this->assertCount( 5, $response_data['notifications'] );
+		$this->assertEquals( 5, $response_data['total'] );
 		if ( method_exists( $this, 'assertEqualsCanonicalizing' ) ) {
-			$this->assertEqualsCanonicalizing( self::$notificationIds, wp_list_pluck( $response_data['active'], 'id' ) );
+			$this->assertEqualsCanonicalizing( self::$notificationIds, wp_list_pluck( $response_data['notifications'], 'id' ) );
 		} else {
-			$this->assertEquals( self::$notificationIds, wp_list_pluck( $response_data['active'], 'id' ), '', 0, 1, true, true );
+			$this->assertEquals( self::$notificationIds, wp_list_pluck( $response_data['notifications'], 'id' ), '', 0, 1, true, true );
 		}
 	}
 
 	/**
-	 * @covers \EDD\API\v3\Notifications::dismissNotification
+	 * @covers \EDD\REST\Controllers\Notifications::dismiss_notification
 	 * @return void
 	 */
 	public function test_dismissing_notification_updates_notification() {
@@ -194,4 +201,85 @@ class NotificationApiTests extends EDD_UnitTestCase {
 		$this->assertEquals( 403, $response->get_status() );
 	}
 
+	/**
+	 * @covers \EDD\REST\Controllers\Notifications::list_notifications
+	 * @return void
+	 */
+	public function test_get_dismissed_notifications() {
+		// Dismiss some notifications first.
+		EDD()->notifications->update( self::$notificationIds[0], array( 'dismissed' => 1 ) );
+		EDD()->notifications->update( self::$notificationIds[1], array( 'dismissed' => 1 ) );
+
+		$request = new \WP_REST_Request( \WP_REST_Server::READABLE, sprintf(
+			'/%s/%s/notifications',
+			Route::NAMESPACE,
+			Route::$version
+		) );
+		$request->set_param( 'dismissed', 1 );
+
+		$response      = self::$server->dispatch( $request );
+		$response_data = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertCount( 2, $response_data['notifications'] );
+		$this->assertEquals( 2, $response_data['total'] );
+	}
+
+	/**
+	 * @covers \EDD\REST\Controllers\Notifications::list_notifications
+	 * @return void
+	 */
+	public function test_filter_by_source() {
+		// Insert a local notification.
+		EDD()->notifications->insert( array(
+			'title'     => 'Local Notification',
+			'content'   => 'Local content',
+			'type'      => 'info',
+			'source'    => 'local',
+			'dismissed' => 0,
+		) );
+
+		$request = new \WP_REST_Request( \WP_REST_Server::READABLE, sprintf(
+			'/%s/%s/notifications',
+			Route::NAMESPACE,
+			Route::$version
+		) );
+		$request->set_param( 'source', 'local' );
+
+		$response      = self::$server->dispatch( $request );
+		$response_data = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertCount( 1, $response_data['notifications'] );
+		$this->assertEquals( 'Local Notification', $response_data['notifications'][0]['title'] );
+	}
+
+	/**
+	 * @covers \EDD\REST\Controllers\Notifications::list_notifications
+	 * @return void
+	 */
+	public function test_filter_by_type() {
+		// Insert a warning notification.
+		EDD()->notifications->insert( array(
+			'title'     => 'Warning Notification',
+			'content'   => 'Warning content',
+			'type'      => 'warning',
+			'source'    => 'api',
+			'dismissed' => 0,
+		) );
+
+		$request = new \WP_REST_Request( \WP_REST_Server::READABLE, sprintf(
+			'/%s/%s/notifications',
+			Route::NAMESPACE,
+			Route::$version
+		) );
+		$request->set_param( 'type', 'warning' );
+
+		$response      = self::$server->dispatch( $request );
+		$response_data = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertCount( 1, $response_data['notifications'] );
+		$this->assertEquals( 'Warning Notification', $response_data['notifications'][0]['title'] );
+	}
 }

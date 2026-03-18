@@ -55,6 +55,7 @@ $low  = version_compare(Version::series(), '9.0', '>=');
 $high = true; // version_compare(Version::series(),'8.99.99','<=');
 
 if ($low && $high) {
+    #[\AllowDynamicProperties]
     class Printer extends ResultPrinter90
     {
         use PrinterTrait8;  // new trait introduced for PHP 8.x

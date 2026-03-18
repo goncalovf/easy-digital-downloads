@@ -130,4 +130,9 @@ class Telemetry extends EDD_UnitTestCase {
 	public function test_email_template_order_receipt_is_enabled() {
 		$this->assertEquals( 1, self::$data['settings']['email_template_order_receipt'] );
 	}
+
+	public function test_environment_checkout_type_default_is_block() {
+		$this->assertArrayHasKey( 'checkout_type', self::$data['environment'] );
+		$this->assertEquals( 'block', self::$data['environment']['checkout_type'] );
+	}
 }

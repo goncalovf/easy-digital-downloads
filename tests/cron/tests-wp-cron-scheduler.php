@@ -100,6 +100,26 @@ class WPCronScheduler extends EDD_UnitTestCase {
 	}
 
 	/**
+	 * Test that has_scheduled returns a boolean.
+	 */
+	public function test_has_scheduled_returns_boolean() {
+		$hook      = 'edd_test_has_scheduled';
+		$timestamp = time() + 3600;
+
+		// Before scheduling.
+		$has_before = $this->scheduler->has_scheduled( $hook );
+		$this->assertFalse( $has_before, 'Should return false before scheduling' );
+
+		// After scheduling.
+		$this->scheduler->schedule_single( $hook, $timestamp );
+		$has_after = $this->scheduler->has_scheduled( $hook );
+		$this->assertTrue( $has_after, 'Should return true after scheduling' );
+
+		// Clean up.
+		wp_clear_scheduled_hook( $hook );
+	}
+
+	/**
 	 * Test that next_scheduled returns false when nothing is scheduled.
 	 */
 	public function test_next_scheduled_returns_false_when_not_scheduled() {

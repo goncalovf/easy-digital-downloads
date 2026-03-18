@@ -36,6 +36,23 @@ class Select extends EDD_UnitTestCase {
 		$this->assertStringContainsString( 'class="edd-select edd-select-chosen edd-discount-select"', $dropdown );
 	}
 
+	public function test_discount_dropdown_filter_invalid_has_search_data_attribute() {
+		$dropdown = EDD()->html->discount_dropdown(
+			array(
+				'filter_invalid' => true,
+			)
+		);
+
+		$this->assertStringContainsString( 'data-search-filter-invalid="1"', $dropdown );
+		$this->assertStringNotContainsString( 'data-filter-invalid', $dropdown );
+	}
+
+	public function test_discount_dropdown_no_filter_invalid_no_search_data_attribute() {
+		$dropdown = EDD()->html->discount_dropdown();
+
+		$this->assertStringNotContainsString( 'data-search-filter-invalid', $dropdown );
+	}
+
 	public function test_category_dropdown() {
 		$category_dropdown = EDD()->html->category_dropdown();
 		$this->assertStringContainsString( 'name="edd_categories"', $category_dropdown );
@@ -90,6 +107,17 @@ class Select extends EDD_UnitTestCase {
 		$this->assertStringContainsString( '<option value="10"', $out );
 		$this->assertStringContainsString( '<option value="11"', $out );
 		$this->assertStringContainsString( '<option value="12"', $out );
+	}
+
+	public function test_category_select_has_search_value_type() {
+		$dropdown = new \EDD\HTML\CategorySelect(
+			array(
+				'chosen' => true,
+			)
+		);
+		$category_dropdown = $dropdown->get();
+
+		$this->assertStringContainsString( 'data-search-value-type="id"', $category_dropdown );
 	}
 
 	public function test_category_select() {

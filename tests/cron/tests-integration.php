@@ -183,6 +183,7 @@ class Integration extends EDD_UnitTestCase {
 			'schedule_recurring',
 			'schedule_single',
 			'next_scheduled',
+			'has_scheduled',
 			'unschedule',
 			'unschedule_all',
 			'is_available',

@@ -796,6 +796,41 @@ class Cart extends EDD_UnitTestCase {
 	}
 
 	/**
+	 * Test that filtering out one item via edd_add_to_cart_item does not
+	 * prevent subsequent items from being added to the cart.
+	 *
+	 * @link https://github.com/awesomemotive/easy-digital-downloads-pro/issues/113
+	 * @since 3.6.6
+	 */
+	public function test_add_to_cart_filter_skips_item_without_breaking_loop() {
+		edd_empty_cart();
+
+		// Filter that rejects price_id 0 but allows price_id 1.
+		$filter = function ( $item ) {
+			if ( is_array( $item ) && isset( $item['options']['price_id'] ) && 0 === (int) $item['options']['price_id'] ) {
+				return false;
+			}
+
+			return $item;
+		};
+
+		add_filter( 'edd_add_to_cart_item', $filter );
+
+		// Attempt to add both price IDs at once.
+		edd_add_to_cart( self::$download->ID, array(
+			'price_id' => array( 0, 1 ),
+		) );
+
+		remove_filter( 'edd_add_to_cart_item', $filter );
+
+		$contents = edd_get_cart_contents();
+
+		// Only price_id 1 should be in the cart.
+		$this->assertCount( 1, $contents );
+		$this->assertEquals( 1, $contents[0]['options']['price_id'] );
+	}
+
+	/**
 	 * Test that get_contents method works with profiler enabled.
 	 */
 	public function test_get_contents_with_profiler() {
