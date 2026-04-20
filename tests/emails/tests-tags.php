@@ -48,6 +48,8 @@ class Tags extends EDD_UnitTestCase {
 	}
 
 	public function test_email_tags_get_tags() {
+		edd_load_email_tags();
+
 		$tags = edd_get_email_tags();
 
 		$this->assertIsArray( $tags );
@@ -71,6 +73,7 @@ class Tags extends EDD_UnitTestCase {
 		$this->assertTrue( edd_email_tag_exists( 'refund_amount' ) );
 		$this->assertTrue( edd_email_tag_exists( 'refund_id' ) );
 		$this->assertTrue( edd_email_tag_exists( 'phone' ) );
+		$this->assertTrue( edd_email_tag_exists( 'company' ) );
 	}
 
 	public function test_email_tags_add() {
@@ -209,6 +212,43 @@ class Tags extends EDD_UnitTestCase {
 		edd_add_order_meta( self::$payment_id, '_edd_phone', '(123) 456-7890' );
 		$render = new \EDD\Emails\Tags\Render();
 		$this->assertEquals( '(123) 456-7890', $render->phone( self::$payment_id, self::$order, 'order' ) );
+	}
+
+	public function test_email_tags_no_company_returns_empty_string() {
+		$render = new \EDD\Emails\Tags\Render();
+		$this->assertEquals( '', $render->company( self::$payment_id, self::$order, 'order' ) );
+	}
+
+	public function test_email_tags_company_returns_company_name() {
+		edd_add_order_meta( self::$payment_id, 'company_name', 'Acme Corp' );
+		$render = new \EDD\Emails\Tags\Render();
+		$this->assertEquals( 'Acme Corp', $render->company( self::$payment_id, self::$order, 'order' ) );
+		edd_delete_order_meta( self::$payment_id, 'company_name' );
+	}
+
+	public function test_email_tags_company_returns_empty_for_non_order_context() {
+		$render = new \EDD\Emails\Tags\Render();
+		$this->assertEquals( '', $render->company( self::$payment_id, self::$order, 'user' ) );
+	}
+
+	public function test_email_tags_company_with_email_object_context() {
+		edd_update_order_meta( self::$payment_id, 'company_name', 'Email Corp' );
+
+		$email_mock = $this->getMockForAbstractClass(
+			\EDD\Emails\Types\Email::class,
+			array(),
+			'',
+			false,
+			true,
+			true,
+			array( 'get_context' )
+		);
+		$email_mock->method( 'get_context' )->willReturn( 'order' );
+
+		$render = new \EDD\Emails\Tags\Render();
+		$this->assertEquals( 'Email Corp', $render->company( self::$payment_id, self::$order, $email_mock ) );
+
+		edd_delete_order_meta( self::$payment_id, 'company_name' );
 	}
 
 	private static function create_download() {
