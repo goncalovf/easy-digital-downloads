@@ -141,9 +141,9 @@ class Elements extends EDD_UnitTestCase {
 	public function test_ajax_user_search() {
 		$user_search = EDD()->html->ajax_user_search();
 
-		$this->assertStringContainsString( 'autocomplete="off"', $user_search );
-		$this->assertStringContainsString( 'placeholder="Enter Username"', $user_search );
-		$this->assertStringContainsString( 'class="edd-ajax-user-search edd-user-dropdown"', $user_search );
+		$this->assertStringContainsString( 'name="user_id"', $user_search );
+		$this->assertStringContainsString( 'data-placeholder="Select a User"', $user_search );
+		$this->assertStringContainsString( 'edd-user-select', $user_search );
 	}
 
 	public function test_checkbox_toggle() {
@@ -193,5 +193,56 @@ class Elements extends EDD_UnitTestCase {
 		$this->assertStringContainsString( 'http://example.com/image.jpg', $output );
 		$this->assertStringContainsString( 'Attach File', $output );
 		$this->assertStringContainsString( 'Upload or choose a logo', $output );
+	}
+
+	/**
+	 * Test multicheck with missing label.
+	 * This covers the bug fix for issue #2305 where missing labels caused errors.
+	 */
+	public function test_multicheck_missing_label() {
+		$multicheck = new \EDD\HTML\Multicheck(
+			array(
+				'name'    => 'test-options',
+				'options' => array(
+					'option1' => array(
+						'label'   => 'Option 1',
+						'checked' => true,
+					),
+					'option2' => array(
+						// Missing label - should fallback to empty string
+						'checked' => false,
+					),
+				),
+			)
+		);
+		$output = $multicheck->get();
+
+		$this->assertStringContainsString( 'name="test-options[option1]"', $output );
+		$this->assertStringContainsString( 'Option 1', $output );
+		// option2 has no label — verify the label tag renders with empty content.
+		$this->assertMatchesRegularExpression( '/<label\b[^>]*for="test-options\[option2\]"[^>]*>\s*<\/label>/', $output );
+	}
+
+	/**
+	 * Test multicheck with array label (invalid).
+	 * This also covers issue #2305 - should not crash with array label.
+	 */
+	public function test_multicheck_array_label() {
+		$multicheck = new \EDD\HTML\Multicheck(
+			array(
+				'name'    => 'test-options',
+				'options' => array(
+					'option1' => array(
+						'label' => array( 'invalid', 'label' ), // Invalid: array instead of string
+						'checked' => false,
+					),
+				),
+			)
+		);
+		$output = $multicheck->get();
+
+		$this->assertStringContainsString( 'name="test-options[option1]"', $output );
+		// Array label should render as empty string, not crash.
+		$this->assertMatchesRegularExpression( '/<label\b[^>]*for="test-options\[option1\]"[^>]*>\s*<\/label>/', $output );
 	}
 }

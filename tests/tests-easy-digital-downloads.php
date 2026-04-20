@@ -70,7 +70,6 @@ class EDD extends EDD_UnitTestCase {
 			array( EDD_PLUGIN_DIR . 'includes/cart/actions.php' ),
 			array( EDD_PLUGIN_DIR . 'includes/api/class-edd-api.php' ),
 			array( EDD_PLUGIN_DIR . 'includes/api/class-edd-api-v1.php' ),
-			array( EDD_PLUGIN_DIR . 'includes/class-edd-cache-helper.php' ),
 			array( EDD_PLUGIN_DIR . 'includes/deprecated/classes.php' ),
 			array( EDD_PLUGIN_DIR . 'includes/class-edd-roles.php' ),
 			array( EDD_PLUGIN_DIR . 'includes/class-edd-stats.php' ),

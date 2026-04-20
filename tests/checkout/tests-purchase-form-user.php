@@ -78,6 +78,7 @@ class PurchaseFormUser extends EDD_UnitTestCase {
 
 		$valid_data = edd_purchase_form_validate_fields();
 		$user       = edd_get_purchase_form_user( $valid_data, false );
+		unset( $user['address']['company'] ); // The legacy function doesn't include the company name.
 		unset( $user['address']['phone'] ); // The legacy function doesn't include the phone number.
 		$legacy     = _edds_get_purchase_form_user( $valid_data );
 
