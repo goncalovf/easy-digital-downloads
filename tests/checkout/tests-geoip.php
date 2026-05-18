@@ -209,6 +209,22 @@ class GeoIPTests extends EDD_UnitTestCase {
 	}
 
 	/**
+	 * Test maybe_update_tax_rate returns early when geoIP data has no country_iso.
+	 */
+	public function test_maybe_update_tax_rate_with_geoip_data_missing_country() {
+		EDD()->session->set( 'edd_pro_geoip', array(
+			'region_code' => 'CA',
+			'region_name' => 'California',
+			'city'        => 'Los Angeles',
+			'ip'          => '1.2.3.4',
+		) );
+
+		$rate = self::$geoip->maybe_update_tax_rate( 0.10 );
+
+		$this->assertEquals( 0.10, $rate );
+	}
+
+	/**
 	 * Test maybe_update_tax_rate updates rate based on geoIP data.
 	 */
 	public function test_maybe_update_tax_rate_with_geoip_data() {

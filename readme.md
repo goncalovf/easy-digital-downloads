@@ -44,8 +44,10 @@ EDD has multiple scripts to prepare installable packages:
 * `postinstall`: Runs automatically after `npm install`; do not use directly.
 * `pro`: Generate an `easy-digital-downloads-pro-x.x.x.zip` file, the pro version of EDD. Does not rebuild assets. Useful for quickly creating an installable package.
 * `repo`: Generate a directory of files to copy over to the public repository. Updates the translation.
-* `test:unit`: Run JS unit tests.
 * `translate`: Translate EDD (Pro).
 * `translate:lite`: Translate the public version of EDD. Runs as part of `npm run lite`; generally do not run this directly.
 * `translate:repo`: Translate the repository copy of EDD. Runs as part of `npm run repo`; generally do not run this directly.
 * `update`: Updates all Composer packages and runs the Mozart script. Only run this if a Composer library needs to be updated.
+
+## E2E Tests
+End-to-end tests use Playwright against an ephemeral Docker-managed WordPress + EDD site. No manual site setup required. See `e2e/README.md` for full details.

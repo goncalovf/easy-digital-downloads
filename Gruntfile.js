@@ -23,11 +23,14 @@ module.exports = function ( grunt ) {
 
 	const commonExclusions = [
 		'!build/**',
+		'!e2e/**',
 		'!includes/blocks/node_modules/**',
 		'!includes/blocks/composer.json',
 		'!includes/blocks/package.json',
 		'!includes/blocks/package-lock.json',
 		'!node_modules/**',
+		'!playwright-report/**',
+		'!test-results/**',
 	];
 
 	// Project configuration.
@@ -121,10 +124,13 @@ module.exports = function ( grunt ) {
 					'!includes/blocks/assets/pro/**',
 					'!includes/blocks/build/pro/**',
 					'!includes/blocks/src/pro/**',
+					'!pro/**',
 					'!src/Pro/**',
 					'!crowdin.yml',
 					'!sonar-project.properties',
 					'!tests/pro/**',
+					'!bin/setup-e2e-site.sh',
+					'!docker-compose.e2e.yml',
 				],
 				dest: 'build/<%= pkg.name %>-public/',
 			}

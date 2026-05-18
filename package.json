@@ -1,6 +1,6 @@
 {
 	"name": "easy-digital-downloads",
-	"version": "3.6.7",
+	"version": "3.6.8",
 	"description": "The easiest way to sell digital products with WordPress.",
 	"private": true,
 	"author": "Easy Digital Downloads",
@@ -33,7 +33,9 @@
 		"to-string-loader": "^1.2.0"
 	},
 	"devDependencies": {
+		"@playwright/test": "^1.54.0",
 		"@wordpress/dom": "^4.22.0",
+		"dotenv": "^17.2.3",
 		"@wordpress/scripts": "30.15.0",
 		"cross-env": "^7.0.3",
 		"grunt": "^1.5.2",
@@ -62,7 +64,11 @@
 		"postinstall": "cd includes/blocks && npm install && cd ../../",
 		"pro": "grunt pro",
 		"repo": "grunt repo && grunt replace:pot_repo",
-		"test:unit": "wp-scripts test-unit-js --config tests/jest/jest.config.js",
+		"test:e2e": "playwright test --config=e2e/playwright.config.js",
+		"test:e2e:headed": "playwright test --config=e2e/playwright.config.js --headed",
+		"test:e2e:debug": "playwright test --config=e2e/playwright.config.js --debug",
+		"test:e2e:report": "playwright show-report",
+		"test:e2e:down": "docker compose -f docker-compose.e2e.yml down -v && rm -f e2e/.docker-env",
 		"translate": "grunt clean && wp i18n make-pot . languages/easy-digital-downloads.pot --exclude=node_modules,assets,tests,libraries --ignore-domain",
 		"update": "composer update --ignore-platform-reqs && composer run mozart"
 	}

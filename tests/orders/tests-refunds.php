@@ -865,4 +865,64 @@ class Refunds extends EDD_UnitTestCase {
 		// Cleanup: disable taxes.
 		edd_update_option( 'enable_taxes', false );
 	}
+
+	/**
+	 * @covers ::edd_get_order_refunds
+	 */
+	public function test_get_order_refunds_returns_refund_child() {
+		$order = parent::edd()->order->create_and_get();
+		edd_refund_order( $order->id );
+
+		$refunds = edd_get_order_refunds( $order->id );
+
+		$this->assertCount( 1, $refunds );
+		$this->assertSame( 'refund', $refunds[0]->type );
+	}
+
+	/**
+	 * @covers ::edd_get_order_refunds
+	 */
+	public function test_get_order_refunds_excludes_renewal_orders() {
+		$order = parent::edd()->order->create_and_get();
+
+		edd_add_order(
+			array(
+				'parent'  => $order->id,
+				'type'    => 'sale',
+				'status'  => 'edd_subscription',
+				'email'   => $order->email,
+				'gateway' => $order->gateway,
+				'total'   => $order->total,
+			)
+		);
+
+		$refunds = edd_get_order_refunds( $order->id );
+
+		$this->assertEmpty( $refunds );
+	}
+
+	/**
+	 * @covers ::edd_get_order_refunds
+	 */
+	public function test_get_order_refunds_returns_refund_not_renewal_when_both_exist() {
+		$order = parent::edd()->order->create_and_get();
+
+		edd_add_order(
+			array(
+				'parent'  => $order->id,
+				'type'    => 'sale',
+				'status'  => 'edd_subscription',
+				'email'   => $order->email,
+				'gateway' => $order->gateway,
+				'total'   => $order->total,
+			)
+		);
+
+		edd_refund_order( $order->id );
+
+		$refunds = edd_get_order_refunds( $order->id );
+
+		$this->assertCount( 1, $refunds );
+		$this->assertSame( 'refund', $refunds[0]->type );
+	}
 }
