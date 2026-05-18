@@ -310,5 +310,51 @@ class PayPalStandard extends EDD_UnitTestCase {
 		// Verify original content is returned.
 		$this->assertEquals( 'Test content', $result );
 	}
-}
 
+	/**
+	 * Test that IPN processing halts when PayPal returns INVALID.
+	 */
+	public function test_invalid_ipn_response_stops_processing() {
+		$order_id = Helpers\EDD_Helper_Payment::create_simple_payment();
+
+		// Ensure IPN verification is enabled (the default).
+		edd_delete_option( 'disable_paypal_verification' );
+
+		// Mock PayPal's verification endpoint to return INVALID.
+		$mock_invalid = static function ( $preempt, $parsed_args, $url ) {
+			if ( false !== strpos( $url, 'paypal.com' ) ) {
+				return array(
+					'body'     => 'INVALID',
+					'response' => array(
+						'code'    => 200,
+						'message' => 'OK',
+					),
+					'headers'  => array(),
+					'cookies'  => array(),
+					'filename' => null,
+				);
+			}
+			return $preempt;
+		};
+		add_filter( 'pre_http_request', $mock_invalid, 10, 3 );
+
+		// Simulate an incoming IPN POST.
+		$_SERVER['REQUEST_METHOD'] = 'POST';
+		$_POST                     = array(
+			'payment_status' => 'Completed',
+			'txn_id'         => 'FORGED_TXN_' . $order_id,
+			'custom'         => $order_id,
+			'payer_email'    => 'attacker@example.com',
+		);
+
+		edd_process_paypal_ipn();
+
+		// Order must still be pending — not completed.
+		$order = edd_get_order( $order_id );
+		$this->assertSame( 'pending', $order->status, 'Order should remain pending when PayPal returns INVALID.' );
+
+		// Clean up.
+		remove_filter( 'pre_http_request', $mock_invalid, 10 );
+		unset( $_POST, $_SERVER['REQUEST_METHOD'] );
+	}
+}
