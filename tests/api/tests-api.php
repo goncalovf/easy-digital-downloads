@@ -223,22 +223,18 @@ class API extends EDD_UnitTestCase {
 
 		endforeach;
 
+		// API-specific vars are only registered for API requests.
+		$original_uri           = isset( $_SERVER['REQUEST_URI'] ) ? $_SERVER['REQUEST_URI'] : '';
+		$_SERVER['REQUEST_URI'] = '/edd-api/v2/products';
+
 		$out = self::$api->query_vars( array() );
-		$this->assertEquals( 'token', $out[0] );
-		$this->assertEquals( 'key', $out[1] );
-		$this->assertEquals( 'query', $out[2] );
-		$this->assertEquals( 'type', $out[3] );
-		$this->assertEquals( 'product', $out[4] );
-		$this->assertEquals( 'category', $out[5] );
-		$this->assertEquals( 'tag', $out[6] );
-		$this->assertEquals( 'term_relation', $out[7] );
-		$this->assertEquals( 'number', $out[8] );
-		$this->assertEquals( 'date', $out[9] );
-		$this->assertEquals( 'startdate', $out[10] );
-		$this->assertEquals( 'enddate', $out[11] );
-		$this->assertEquals( 'customer', $out[12] );
-		$this->assertEquals( 'discount', $out[13] );
-		$this->assertEquals( 'format', $out[14] );
+
+		$_SERVER['REQUEST_URI'] = $original_uri;
+
+		$expected = array( 'token', 'key', 'query', 'type', 'product', 'category', 'tag', 'term_relation', 'number', 'date', 'startdate', 'enddate', 'customer', 'format', 'discount' );
+		foreach ( $expected as $var ) {
+			$this->assertContains( $var, $out );
+		}
 	}
 
 	public function test_get_versions() {

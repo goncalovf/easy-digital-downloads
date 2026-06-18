@@ -187,4 +187,50 @@ class Encryption extends EDD_UnitTestCase {
 		$decrypted = Utility::decrypt( $token );
 		$this->assertEquals( $plaintext, $decrypted );
 	}
+
+	/**
+	 * Test key_fingerprint() returns a lowercase hex SHA-256 (64 chars).
+	 *
+	 * @covers ::key_fingerprint
+	 */
+	public function test_key_fingerprint_is_hex_sha256() {
+		$fingerprint = Utility::key_fingerprint();
+
+		$this->assertNotNull( $fingerprint );
+		$this->assertEquals( 64, strlen( $fingerprint ) );
+		$this->assertTrue( ctype_xdigit( $fingerprint ) );
+	}
+
+	/**
+	 * Test key_fingerprint() is stable for a given label.
+	 *
+	 * @covers ::key_fingerprint
+	 */
+	public function test_key_fingerprint_is_stable() {
+		$this->assertEquals( Utility::key_fingerprint(), Utility::key_fingerprint() );
+	}
+
+	/**
+	 * Test key_fingerprint() is domain-separated by label.
+	 *
+	 * @covers ::key_fingerprint
+	 */
+	public function test_key_fingerprint_domain_separated() {
+		$this->assertNotEquals(
+			Utility::key_fingerprint( 'label-a' ),
+			Utility::key_fingerprint( 'label-b' )
+		);
+	}
+
+	/**
+	 * Test key_fingerprint() does not expose a raw hash of the salts.
+	 *
+	 * @covers ::key_fingerprint
+	 */
+	public function test_key_fingerprint_is_not_raw_salt_hash() {
+		$this->assertNotEquals(
+			hash( 'sha256', NONCE_KEY . NONCE_SALT ),
+			Utility::key_fingerprint()
+		);
+	}
 }

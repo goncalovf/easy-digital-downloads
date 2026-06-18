@@ -572,6 +572,18 @@ class Misc extends EDD_UnitTestCase {
 		$this->assertTrue( edd_purchase_form_validate_cc_zip( 'SW1A 1AA', 'GB' ) );
 	}
 
+	public function test_edd_doing_cron_returns_false_by_default() {
+		$this->assertFalse( edd_doing_cron() );
+	}
+
+	public function test_edd_doing_cron_returns_true_inside_action_scheduler_job() {
+		do_action( 'action_scheduler_before_execute', 1 );
+		$this->assertTrue( edd_doing_cron() );
+
+		do_action( 'action_scheduler_after_execute', 1 );
+		$this->assertFalse( edd_doing_cron() );
+	}
+
 	private function write_test_file( $full_file_path ) {
 		$file = FileSystem::fopen( $full_file_path, "w" );
 		fwrite( $file,"" );
