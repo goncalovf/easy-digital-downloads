@@ -54,6 +54,32 @@ class CheckoutSection extends EDD_UnitTestCase {
 		);
 	}
 
+	public function test_banned_emails_array_input() {
+		$this->assertSame(
+			array(
+				'banned_emails' => array( 'user1@example.local', 'user2@example.local' ),
+			),
+			Checkout::sanitize(
+				array(
+					'banned_emails' => array( 'user1@example.local', 'user2@example.local' ),
+				)
+			)
+		);
+	}
+
+	public function test_banned_emails_array_input_with_empty_and_whitespace_entries() {
+		$this->assertSame(
+			array(
+				'banned_emails' => array( 'user1@example.local' ),
+			),
+			Checkout::sanitize(
+				array(
+					'banned_emails' => array( 'user1@example.local', '', '   ', 'user1@example.local' ),
+				)
+			)
+		);
+	}
+
 	public function test_banned_emails_with_invalid_emails() {
 		$this->assertSame(
 			array(

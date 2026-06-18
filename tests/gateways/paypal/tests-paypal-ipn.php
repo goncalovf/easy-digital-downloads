@@ -6,7 +6,7 @@
  *
  * Note: Subscription renewal tests require EDD Recurring to be active.
  *
- * @package   easy-digital-downloads
+ * @package   EDD\Tests\Gateways\PayPal
  * @copyright Copyright (c) 2025, Sandhills Development, LLC
  * @license   GPL2+
  * @since     3.6.3
